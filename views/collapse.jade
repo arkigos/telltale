@@ -1,0 +1,11 @@
+extends mixins
+
+append prescripts
+    != js("angular_mods/collapse.js")
+
+block content
+    div(ng-controller="CollapseCtrl")
+        button.btn(ng-click="isCollapsed = !isCollapsed") Toggle collapse
+        hr
+        div(collapse="isCollapsed")
+            .well.well-large Some content

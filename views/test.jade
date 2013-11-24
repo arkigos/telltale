@@ -1,0 +1,19 @@
+extends mixins
+
+append prescripts
+    != js("bootstrap/src/collapse/collapse.js")
+    != js("bootstrap/src/alert/alert.js")
+    != js("bootstrap/src/modal/modal.js")
+    
+append styles
+    != css("typistocracy")
+    != css("custom")
+block content
+
+    .container
+        .jumbotron
+            h1 Hello!
+            h3 Why, hello friend.
+        div(ng-controller="ModalCtrl")
+            button.btn.btn-default(ng-click="open()") Open me!
+            div(ng-show="selected") Selection from a modal: {{ selected }}

@@ -1,0 +1,77 @@
+extends mixins
+
+append prescripts
+    != js("bootstrap/src/collapse/collapse.js")
+    != js("bootstrap/src/alert/alert.js")
+    
+append styles
+    != css("typistocracy")
+
+block content
+    .container(ng-controller="QuizCtrl")
+        .authentic(ng-switch on="login.loggedIn")
+            .jumbotron
+                h1 The Greatest Typology Quiz Ever
+                h4 Now all we have to do is make it!
+                .logged-out(ng-switch-when="false")
+                    h3 No matter what you put here, you will be logged in. If it's the same as you put in before, the last state of that user will be restored. 
+                    input.form-control.input-lg(ng-model="login.user", placeholder="Username - ideally your PerC/TypC username...")
+                    input.form-control.input-lg(ng-model="login.pass", placeholder="Password - if you want to. Not required." type="password")
+                    button.btn.btn-primary(ng-click="logIn()") Ready or not!
+                .logged-in(ng-switch-when="true")
+                    h2 Welcome, {{ login.user }}!
+                    button.btn.btn-primary.btn-sm(ng-click="logOut()") Logout
+            .logged-in(ng-switch-when="true")
+                .well.well-large
+                    button.btn.btn-primary.btn-block(ng-click="isCollapsed = !isCollapsed") Add a question!
+                    br
+                    div(collapse="isCollapsed")
+                        form.form-horizontal
+                            .form-group
+                                h4 Question:
+                                input.form-control(type="text", ng-model="question.question", placeholder="e.g. What is your quest?")
+                            .form-group.col-md-offset-2
+                                hr
+                                h4 Answer:
+                                .input-group(ng-repeat="answer in answers")
+                                    .input-group-btn
+                                        button.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", type="button") {{ answer.indicates }} &nbsp;
+                                            span.caret
+                                        ul.dropdown-menu
+                                            li(ng-repeat="axis in axes")
+                                                a(ng-click="answer.indicates = axis") {{ axis }}
+                                    input.form-control(type="text", ng-model="answer.text", placeholder="e.g. To find the Holy Grail...")
+                                    .input-group-btn
+                                        button.btn.btn-primary(ng-click="answers.splice($index,1)")
+                                            span.glyphicon.glyphicon-remove
+                                    
+                        .form-group
+                            button.btn.btn-primary.btn-block(type="button", ng-click="addAnswer()") Add Answer
+                        .form-group
+                            button.btn.btn-default(type="submit", ng-click="saveQuestion()") Save Question
+                        .alert.alert-success.alert-dismissable(ng-show='saveSuccess')
+                            button.close(type="button", data-dismissable="alert", aria-hidden="true" ng-click="saveSuccess = false") &times;
+                            strong Success!
+                            | You've successfully contributed to our grand effort. You can now die in peace.
+        
+                hr
+                .row(ng-repeat="question in questions")
+                    .panel.panel-default(id="{{question._id}}")
+                        .panel-heading Question &#35;{{ $index + 1 }}
+                        .panel-body
+                            h3 {{ question.question }}
+                        .btn-group-vertical.btn-block
+                            button.btn.btn-default.btn-lg(ng-repeat="answer in question.answers", 
+                                ng-class="{active: answer.chosen}",
+                                ng-click="chooseAnswer(question, answer)") {{ answer.text }}
+                
+                nav.navbar.navbar-default.navbar-fixed-bottom
+                    .navbar-header
+                        button.navbar-toggle(type='button', data-toggle='collapse', data-target='#nav-collapse')
+                            span.sr-only Toggle navigation
+                            span.icon-bar
+                            span.icon-bar
+                            span.icon-bar
+                          a.navbar-brand(href='#') by Typistocracy
+
+
