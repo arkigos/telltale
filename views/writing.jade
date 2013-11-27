@@ -13,8 +13,6 @@ append styles
 
 block content
     .controller(ng-controller="EditorCtrl", ng-switch on="siteState")
-        {{ user }}
-        {{ thisChapter }}
         .login(ng-switch-when="Login")
             #header
                 form.form-inline.pull-right
