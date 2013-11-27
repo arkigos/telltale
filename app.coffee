@@ -15,12 +15,13 @@ app
 require('./routes')(app)
     
 app
+    .use(express.bodyParser())
     .use(app.router)
     .use(assets
         jsCompilers:
             jade: jadeAssets())
     .use(express.logger 'dev')
-    .use(express.bodyParser())
+    .use(express.methodOverride())
     
 app.locals.basedir = '/'
     

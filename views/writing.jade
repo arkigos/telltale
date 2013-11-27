@@ -1,0 +1,116 @@
+extends mixins
+
+block title
+    title STORYFORGE
+
+append prescripts
+    script(src="//tinymce.cachefly.net/4.0/tinymce.min.js")
+    != js("angular_mods/angular-tinymce-inline.js")
+    != js("xeditable.js")
+    
+append styles
+    != css("xeditable.css")
+
+block content
+    .controller(ng-controller="EditorCtrl", ng-switch on="siteState")
+        {{ user }}
+        {{ thisChapter }}
+        .login(ng-switch-when="Login")
+            #header
+                form.form-inline.pull-right
+                    .form-group
+                        input.form-control(type="text", placeholder="Username", ng-model="loginput.user")
+                    .form-group
+                        input.form-control(type="password", placeholder="Password", ng-model="loginput.pass")
+                    button.btn.btn-warning(ng-click="login()") Log In
+                br
+                br
+                h1.site-banner STORYFORGE
+            .well
+                ul.list-inline.text-center.scrim(ng-controller="ModalCtrl")
+                    li
+                        a(href="#", ng-click="open()") 
+                            h2 EXPLORE
+                    li
+                        a(href="#", ng-click="open()") 
+                            h2 ORGANIZE
+                    li
+                        a(href="#", ng-click="open()") 
+                            h2 COLLABORATE
+                    li
+                        a(href="#", ng-click="open()") 
+                            h2 BE SEEN
+                h1.create-story-banner.text-center CREATE YOUR STORY!
+            .register
+                .container
+                    .col-lg-6
+                        .well
+                            .panel
+                                .panel-heading
+                                    h1.text-center Start forging your story...
+                                .panel-body
+                                    input.form-control.input-lg(type="text", placeholder="Username", ng-model="reginput.user")
+                                    input.form-control.input-lg(type="email", placeholder="Email", ng-model="reginput.email")
+                                    input.form-control.input-lg(type="text", placeholder="Password", ng-model="reginput.pass")
+                            button.btn.btn-warning.center-block(ng-click="register()") Register!
+                    .col-lg-6
+                        .well
+                            .panel
+                                .panel-heading
+                                    h1.text-center Check out the Demo
+                                .panel-body
+                                    button.btn.btn-warning.btn-block.btn-lg Coming Soon
+            
+        .dashboard(ng-switch-when="Dashboard")
+            .container
+                h1 Dashboard!
+                .col-lg-6
+                    .well
+                        .panel.panel-default
+                            h2.text-center Books
+                            table.table.table-hover
+                                tr
+                                    td(style="width:1em;")
+                                        h4 Edit
+                                    td
+                                        h4 Title
+                                    td(style="width:10em;")
+                                        h4 Genre
+                                    td(style="width:1em;")
+                                tr(ng-repeat="book in user.books")
+                                    td
+                                        button.btn.btn-warning.btn-sm(ng-click="editBook($index)")
+                                            span.glyphicon.glyphicon-edit
+                                    td
+                                        span(editable-text="book.title", onaftersave="saveUser()") {{ book.title }}
+                                    td
+                                        select.form-control(ng-model="book.genre")
+                                            option Horror
+                                            option Classic
+                                            option Poems
+                                            option Sci-Fi
+                                    td
+                                        button.btn.btn-default.btn-xs(ng-click="removeBook($index)")
+                                            span.glyphicon.glyphicon-remove
+                        button.btn.btn-warning(ng-click="addBook()")
+                            span.glyphicon.glyphicon-plus
+                            |  Add Book
+            
+        
+        .editor(ng-switch-when="Editor")
+            .page-header
+                h1.site-banner {{ thisBook.title }}
+            .col-md-3
+                ul.list-group
+                    li.list-group-item(ng-repeat="chapter in user.books[thisBookIndex].chapters")
+                        button.btn.btn-warning.btn-sm(ng-click="editChapter($index)")
+                            span.glyphicon.glyphicon-edit
+                        | &nbsp;
+                        span(editable-text="chapter.title", onaftersave="saveUser()") {{ chapter.title }}
+                button.btn.btn-warning(ng-click="addChapter()") Add Chapter
+            .col-md-9
+                .well
+                    .panel
+                        h1.text-center {{ thisChapterTitle }}
+                        .chapter-content(ui-tinymce-inline, ng-model="thisChapter.content")
+                    button.btn.btn-warning(ng-click="saveChapter()") Save Work

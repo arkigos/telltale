@@ -1,75 +1,83 @@
-@angular.module('arkh', ['ui.bootstrap'])
+@angular.module('arkh', ['ui.bootstrap', 'ui.tinymce.inline', 'xeditable', 'textAngular'])
+    .run (editableOptions) ->
+        editableOptions.theme = 'bs3'
 
-@QuizCtrl = ($scope, $resource) ->
-    User = $resource '/user/:username',
-        username: 'Username'
-        password: '@#changeme#@'
-        selftype: 'XyXy'
-        answered: []
-        
-    Question = $resource '/quiz/:question',
-        question: 'What is your quest?'
-        answers: []
-        author: 'arkigos'
-
-    $scope.saveSuccess = false
-    
-    $scope.questions = []
-    $http.get('/questions').success (data) ->
-        $scope.questions = data
-        
-    $scope.login = 
+@EditorCtrl = ($scope, $http) ->
+    $scope.siteState = "Login"
+    $scope.thisBook = {}
+    $scope.thisBookIndex = -1
+    $scope.thisChapter = 
+        title: "Hello, nurse!"
+        content: "Select something, noob."
+    $scope.thisChapterTitle = "Placeholder"
+    $scope.auth =
+        loggedIn: false
+    $scope.user = {}
+    $scope.reginput =
+        user: ""
+        email: ""
+        pass: ""
+        books: []
+    $scope.loginput =
         user: ""
         pass: ""
-        loggedIn: false
-    
-    $scope.logIn = () ->
-        createUser = () ->
-            $http.put('/user/'+, userdata).
-        if $scope.login.user
-            $http.get('/users/'+$scope.login.user).success (data) ->
-                user = data[0]
-                if !user
-                    
-                    console.log('empty array be true')
-                
+    $scope.addChapter = () ->
+        $http
+            .put('/save/chapters', {content: "<p>Start writing!!</p>"})
+            .success (data) ->
+                $scope.user.books[$scope.thisBookIndex].chapters.push
+                    title: "New Chapter Title - click to Edit"
+                    id: data._id
+                $scope.saveUser()
+    $scope.saveChapter = () ->
+        $scope.thisChapter.id = $scope.thisChapter._id
+        $http
+            .put('/updatebyid/chapters', $scope.thisChapter)
+            .success (data) ->
                 console.log(data)
-                $scope.login.loggedIn = true
-    $scope.logOut = () ->
-        $scope.login.loggedIn = false
-    
-    $scope.axes = [
-        "Fe"
-        "Ti"
-        "Fi"
-        "Te"
-        "Se"
-        "Ni"
-        "Ne"
-        "Si"
-    ]
-    $scope.question = 
-        question: ""
-        answers: []
-    $scope.answers = [{text: "", chosen: false, indicates: $scope.axes[0]}]
-    $scope.saveQuestion = () ->
-        $scope.question.answers = $scope.answers
-        $scope.questions.push($scope.question)
-        $scope.question = 
-            question: ""
-            answers: []
-        $scope.answers = [{text: "", chosen: false, indicates: $scope.axes[0]}]
-        $scope.saveSuccess = true
-    $scope.addAnswer = () ->
-        $scope.answers.push({text: "", chosen: false, indicates: $scope.axes[0]})
-    $scope.chooseAnswer = (question, answer) ->
-        ans.chosen = false for ans in question.answers
-        if answer.chosen
-            answer.chosen = false
-        else
-            answer.chosen = true
-    
-    $scope.isCollapsed = true
+    $scope.editChapter = (index) ->
+        theChap = $scope.user.books[$scope.thisBookIndex].chapters[index]
+        $http
+            .get('/get/chapters/id/'+theChap.id)
+            .success (data) ->
+                $scope.thisChapterTitle = theChap.title
+                $scope.thisChapter = data
+    $scope.editBook = (index) ->
+        $scope.thisBook = $scope.user.books[index]
+        $scope.thisBookIndex = index
+        $scope.changeState("Editor")
+    $scope.changeState = (state) ->
+        $scope.siteState = state
+    $scope.login = () ->
+        $http
+            .get('/get/users/user/'+$scope.loginput.user)
+            .success (data) ->
+                $scope.auth.loggedIn = true
+                $scope.user = data
+                $scope.siteState = "Dashboard"
+    $scope.addBook = () ->
+        $scope.user.books.push
+            title: "New Title - click to change"
+            genre: ""
+            chapters: []
+    $scope.saveUser = () ->
+        $http
+            .put('/save/users', $scope.user)
+            .success (data) ->
+                console.log(data)
+    $scope.removeBook = (index) ->
+        if confirm("That will permanently remove this book!!!!!! Are you sure?")
+            $scope.user.books.splice(index)
+            $scope.saveUser()
+    $scope.register = () ->
+        regi = $scope.reginput
+        if regi.user && regi.email && regi.pass
+            $http
+                .put("/save/users", $scope.reginput)
+                .success (data) ->
+                    $scope.user = data
+                    console.log($scope.user)
+                    $scope.login()
 
 @ModalCtrl = ($scope, $modal) ->
     $scope.items = ['item1', 'item2', 'item3', 'item4']
@@ -91,9 +99,3 @@
     
     $scope.cancel = () ->
         $modalInstance.dismiss 'cancel'
-    
-    
-    
-    
-    
-    
